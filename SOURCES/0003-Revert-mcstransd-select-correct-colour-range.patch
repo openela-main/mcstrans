@@ -1,0 +1,56 @@
+From 7426ba3f8d9edc5222db5663c8a9e5312f489e92 Mon Sep 17 00:00:00 2001
+From: Vit Mojzis <vmojzis@redhat.com>
+Date: Tue, 2 Jul 2019 14:09:04 +0200
+Subject: [PATCH] Revert "mcstransd select correct colour range."
+
+This reverts commit fe17b3d2d924018750386c5ee74f12ca4b054136.
+
+MLS ranges should be compared based on dominance.
+
+This fixes mlscolor-test on mcstrans examples.
+
+Eg. mlscolor-test using /usr/share/mcstrans/examples/urcsts when executed on mls
+machine fails as follows:
+
+\#pushd /usr/share/mcstrans/examples/urcsts
+\#cp -f secolor.conf /etc/selinux/mls/secolor.conf
+\#cp -f setrans.conf /etc/selinux/mls/setrans.conf
+\#systemctl restart mcstransd
+\#python3 /usr/share/mcstrans/util/mlscolor-test urcsts.color
+For 'system_u:system_r:inetd_t:SystemLow' got
+	'#000000 #000000 #000000 #000000 #000000 #000000 #000000 #000000' expected
+	'#000000 #000000 #000000 #000000 #000000 #000000 #000000 #008000'
+...
+mlscolor-test done with 19 errors
+
+Signed-off-by: Vit Mojzis <vmojzis@redhat.com>
+---
+ mcstrans/src/mcscolor.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/mcstrans/src/mcscolor.c b/mcstrans/src/mcscolor.c
+index 79fc1c8b..f9c64da3 100644
+--- a/mcstrans/src/mcscolor.c
++++ b/mcstrans/src/mcscolor.c
+@@ -134,12 +134,12 @@ static const secolor_t *find_color(int idx, const char *component,
+ 	}
+ 
+ 	while (ptr) {
+-		if (fnmatch(ptr->pattern, component, 0) == 0) {
+-			if (idx == COLOR_RANGE) {
+-			    if (check_dominance(ptr->pattern, raw) == 0)
+-					return &ptr->color;
+-			} else 
+-				return &ptr->color;
++		if (idx == COLOR_RANGE) {
++		    if (check_dominance(ptr->pattern, raw) == 0)
++			return &ptr->color;
++		} else {
++		    if (fnmatch(ptr->pattern, component, 0) == 0)
++			return &ptr->color;
+ 		}
+ 		ptr = ptr->next;
+ 	}
+-- 
+2.21.0
+
