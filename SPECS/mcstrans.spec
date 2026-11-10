@@ -1,7 +1,7 @@
 Summary: SELinux Translation Daemon
 Name: mcstrans
 Version: 3.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPL+
 Url: https://github.com/SELinuxProject/selinux/wiki
 Source: https://github.com/SELinuxProject/selinux/releases/download/3.6/mcstrans-3.6.tar.gz
@@ -12,6 +12,7 @@ Source2: secolor.conf.8
 Patch0001: 0001-mcstrans-Do-not-accept-incomplete-contexts.patch
 Patch0002: 0002-Revert-Do-not-automatically-install-Russian-translat.patch
 Patch0003: 0003-Revert-mcstrans-Remove-the-Russian-translations.patch
+Patch0004: 0004-mcstrans-Fix-translation-for-uncached-entries.patch
 # Patch list end
 BuildRequires: gcc
 BuildRequires: make
@@ -94,6 +95,9 @@ install -m644 %{SOURCE2} %{buildroot}%{_mandir}/man8/
 %{_usr}/share/mcstrans/util/*
 
 %changelog
+* Tue May 05 2026 Vit Mojzis <vmojzis@redhat.com> - 3.6-2
+- Fix translation for uncached entries (RHEL-173428)
+
 * Thu Dec 14 2023 Petr Lautrbach <lautrbach@redhat.com> - 3.6-1
 - SELinux userspace 3.6 release
 
